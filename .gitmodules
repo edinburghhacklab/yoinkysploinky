@@ -1,0 +1,3 @@
+[submodule "neato-sdk-js"]
+	path = neato-sdk-js
+	url = git@github.com:edinburghhacklab/neato-sdk-js.git
