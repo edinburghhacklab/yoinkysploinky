@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Processing oauth...</title>
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+	</head>
+	<body>
+		<p id="status">Processing oauth...</p>
+		<script type="text/javascript">
+			(() => {
+			var params = document.location.hash.replace("#", "").split("&");
+			var payload = {};
+
+			params.forEach(function (item, index) {
+				var key = item.split("=")[0] || "";
+				var value = item.split("=")[1] || "";
+
+				if (key.localeCompare("access_token") == 0) {
+					payload.access_token = value;
+				} else if (key.localeCompare("error") == 0) {
+					payload.error = value;
+				} else if (key.localeCompare("error_description") == 0) {
+					payload.error_description = value.replace(/\+/g, " ");
+				} else if (key.localeCompare("expires_in") == 0) {
+					payload.expires_in = value;
+				}
+			});
+
+				if ( ! payload.access_token) {
+					document.title = "Failed";
+					$('#status').html("Invalid request.");
+					return;
+				}
+
+			if (payload.error) {
+				document.title = "Failed";
+				$('#status').html("OAuth returned error: "+payload.error+"\n"+payload.error_description);
+				return;
+			}
+
+			$.post("/api/oauth", payload, (data) => {
+				if (data == "success") {
+					document.title = "Success";
+					$('#status').html("OAuth succeeded! You can now return to the server console.");
+				} else {
+					document.title = "Failed";
+					$('#status').html("Server returned unexpected value: "+JSON.stringify(data));
+				}
+			}).fail(() => {
+				document.title = "Failed";
+				$('#status').html("Server post request failed!");
+			});
+			})();
+		</script>
+	</body>
+</html>
